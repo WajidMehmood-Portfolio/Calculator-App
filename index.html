@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elite Calculator - ApexcifyTechnologys</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Montserrat:wght@400;600;700&display=swap" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.7.7/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjs@11.6.0/lib/browser/math.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container" id="app-container">
+    <div class="widgets">
+      <div class="widget clock" aria-live="polite" aria-label="Live Clock">
+        <h3><i class="fas fa-clock"></i> Current Time</h3>
+        <p id="clock-time"></p>
+        <p id="clock-date"></p>
+      </div>
+      <div class="widget weather" aria-label="Weather Information">
+        <h3><i class="fas fa-cloud-sun"></i> Weather</h3>
+        <p id="weather-location"></p>
+        <p id="weather-temp"></p>
+        <p id="weather-condition"><i class="fas fa-sun weather-icon"></i> Loading...</p>
+      </div>
+      <div class="widget quote" aria-label="Motivational Quote">
+        <h3><i class="fas fa-lightbulb"></i> Tip of the Day</h3>
+        <p id="daily-quote">Stay curious and keep learning! The best way to predict the future is to create it.</p>
+        <p class="quote-author">— Abraham Lincoln</p>
+      </div>
+    </div>
+    <div class="calculator-wrapper">
+      <div class="calculator" role="application" aria-label="Advanced Calculator">
+        <div class="memory-indicator" id="memory-indicator" style="display: none;">
+          <i class="fas fa-memory"></i> <span id="memory-value">0</span>
+        </div>
+        <div class="sticky-header">
+          <div class="mode-toggle" role="tablist" aria-label="Calculator Modes">
+            <button role="tab" aria-selected="true" onclick="toggleMode('basic')" data-preview="Basic">
+              <i class="fas fa-calculator button-icon"></i>Basic
+              <span class="tooltip">Basic Calculator Mode</span>
+            </button>
+            <button role="tab" aria-selected="false" onclick="toggleMode('scientific')" data-preview="Scientific">
+              <i class="fas fa-square-root-alt button-icon"></i>Sci
+              <span class="tooltip">Scientific Calculator Mode</span>
+            </button>
+            <button role="tab" aria-selected="false" onclick="toggleMode('converter')" data-preview="Converter">
+              <i class="fas fa-exchange-alt button-icon"></i>Conv
+              <span class="tooltip">Unit Converter Mode</span>
+            </button>
+            <button role="tab" aria-selected="false" onclick="toggleMode('graph')" data-preview="Graph">
+              <i class="fas fa-chart-line button-icon"></i>Graph
+              <span class="tooltip">Graph Plotting Mode</span>
+            </button>
+            <span class="tab-indicator"></span>
+          </div>
+          <div class="theme-toggle" role="radiogroup" aria-label="Theme Selection">
+            <button role="radio" aria-checked="false" onclick="toggleTheme('light')">
+              <i class="fas fa-sun button-icon"></i>Light
+            </button>
+            <button role="radio" aria-checked="true" onclick="toggleTheme('dark')">
+              <i class="fas fa-moon button-icon"></i>Dark
+            </button>
+          </div>
+          <button id="toggle-history" onclick="toggleHistory()" aria-label="Toggle History" aria-expanded="false">
+            <i class="fas fa-history button-icon"></i>History
+            <span class="tooltip">Show/Hide Calculation History</span>
+          </button>
+        </div>
+        <input type="text" id="display" aria-live="polite" placeholder="0" />
+        <div class="history-log" id="history" aria-label="Calculation History">
+          <div class="history-content"></div>
+        </div>
+        <div class="buttons-container">
+          <div class="buttons" id="buttons" tabindex="0" aria-label="Calculator Buttons">
+            <div class="basic-buttons" aria-hidden="false">
+              <button onclick="clearDisplay()" class="clear" aria-label="Clear">
+                <i class="fas fa-eraser button-icon"></i>C
+                <span class="tooltip">Clear Display</span>
+              </button>
+              <button onclick="append('/')" class="operator">÷</button>
+              <button onclick="append('*')" class="operator">×</button>
+              <button onclick="del()" aria-label="Delete">
+                <i class="fas fa-backspace button-icon"></i>
+                <span class="tooltip">Delete Last Character</span>
+              </button>
+              <button onclick="append('7')">7</button>
+              <button onclick="append('8')">8</button>
+              <button onclick="append('9')">9</button>
+              <button onclick="append('-')" class="operator">−</button>
+              <button onclick="append('4')">4</button>
+              <button onclick="append('5')">5</button>
+              <button onclick="append('6')">6</button>
+              <button onclick="append('+')" class="operator">+</button>
+              <button onclick="append('1')">1</button>
+              <button onclick="append('2')">2</button>
+              <button onclick="append('3')">3</button>
+              <button onclick="calculate()" class="equals">
+                <i class="fas fa-equals button-icon"></i>
+                <span class="tooltip">Calculate Result</span>
+              </button>
+              <button onclick="append('0')">0</button>
+              <button onclick="append('.')">.</button>
+              <button onclick="toggleFraction()">
+                <i class="fas fa-divide button-icon"></i>Frac
+                <span class="tooltip">Toggle Fraction/Decimal</span>
+              </button>
+            </div>
+            <div class="scientific-buttons" aria-hidden="true">
+              <button onclick="applyFunction('sin')" class="function">sin</button>
+              <button onclick="applyFunction('cos')" class="function">cos</button>
+              <button onclick="applyFunction('tan')" class="function">tan</button>
+              <button onclick="applyFunction('asin')" class="function">sin⁻¹</button>
+              <button onclick="applyFunction('acos')" class="function">cos⁻¹</button>
+              <button onclick="applyFunction('atan')" class="function">tan⁻¹</button>
+              <button onclick="applyFunction('log')" class="function">log</button>
+              <button onclick="applyFunction('ln')" class="function">ln</button>
+              <button onclick="applyFunction('exp')" class="function">e^x</button>
+              <button onclick="applyFunction('pow10')" class="function">10^x</button>
+              <button onclick="applyFunction('sqrt')" class="function">√</button>
+              <button onclick="applyFunction('cbrt')" class="function">∛</button>
+              <button onclick="append('**')" class="function">x^y</button>
+              <button onclick="append('Math.PI')" class="function">π</button>
+              <button onclick="append('Math.E')" class="function">e</button>
+              <button onclick="memoryOperation('M+')" class="memory">M+</button>
+              <button onclick="memoryOperation('M-')" class="memory">M-</button>
+              <button onclick="memoryOperation('MR')" class="memory">MR</button>
+              <button onclick="memoryOperation('MC')" class="memory">MC</button>
+              <button onclick="append('(')" class="function">(</button>
+              <button onclick="append(')')" class="function">)</button>
+              <button onclick="applyFunction('factorial')" class="function">n!</button>
+            </div>
+            <div class="converter-buttons" aria-hidden="true">
+              <button onclick="convert('length', 'cm-to-inch')" class="converter">cm → in</button>
+              <button onclick="convert('length', 'inch-to-cm')" class="converter">in → cm</button>
+              <button onclick="convert('length', 'm-to-ft')" class="converter">m → ft</button>
+              <button onclick="convert('length', 'ft-to-m')" class="converter">ft → m</button>
+              <button onclick="convert('weight', 'kg-to-lb')" class="converter">kg → lb</button>
+              <button onclick="convert('weight', 'lb-to-kg')" class="converter">lb → kg</button>
+              <button onclick="convert('temp', 'c-to-f')" class="converter">°C → °F</button>
+              <button onclick="convert('temp', 'f-to-c')" class="converter">°F → °C</button>
+              <button onclick="convert('area', 'sqm-to-sqft')" class="converter">m² → ft²</button>
+              <button onclick="convert('area', 'sqft-to-sqm')" class="converter">ft² → m²</button>
+              <button onclick="convert('volume', 'l-to-gal')" class="converter">L → gal</button>
+              <button onclick="convert('volume', 'gal-to-l')" class="converter">gal → L</button>
+              <button onclick="convertCurrency('USD', 'PKR')" class="converter" aria-label="Convert USD to PKR">$ → ₨</button>
+              <button onclick="convertCurrency('PKR', 'USD')" class="converter" aria-label="Convert PKR to USD">₨ → $</button>
+              <button onclick="convertCurrency('EUR', 'USD')" class="converter">€ → $</button>
+              <button onclick="convertCurrency('USD', 'EUR')" class="converter">$ → €</button>
+            </div>
+          </div>
+        </div>
+        <div id="graph-container">
+          <input type="text" id="graph-input" placeholder="Enter equation (e.g., y = x^2 or y = sin(x))" aria-label="Graph Equation Input" />
+          <div id="graph-error" class="graph-error" style="display: none;"></div>
+          <div id="graph-suggestions" class="graph-suggestions">
+            Examples: y = x^2, y = sin(x), y = x + 2
+          </div>
+          <canvas id="graph" aria-label="Graph Plot"></canvas>
+          <div id="zoom-controls">
+            <button onclick="zoomIn()">+</button>
+            <button onclick="zoomOut()">-</button>
+            <button onclick="panLeft()">←</button>
+            <button onclick="panRight()">→</button>
+          </div>
+        </div>
+        <div id="loading" class="loading" aria-live="polite" style="display: none;">Loading Data...</div>
+        <div id="preview" class="mode-preview" style="display: none;"></div>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
